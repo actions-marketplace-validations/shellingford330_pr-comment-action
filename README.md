@@ -54,6 +54,36 @@ The url of created pull request comment.
 
 ## Example
 
-```yaml
+````yaml
+name: PR Comment
+on:
+  issue_comment:
+    types: [created]
 
-```
+jobs:
+  create:
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create output file
+        run: echo "Create PR comment successfully!" > output.txt
+      - name: Comment PR
+        uses: shellingford330/pr-comment-action@v0.0.3
+        with:
+          owner: ${{ github.event.repository.owner.login }}
+          repo: ${{ github.event.repository.name }}
+          pr_number: ${{ github.event.issue.number }}
+          filepath: output.txt
+          template: |
+            <details>
+            <summary>Show Output</summary>
+
+            ```
+            {{ . }}
+            ```
+
+            </details>
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+````
