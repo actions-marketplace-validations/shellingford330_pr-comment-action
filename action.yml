@@ -1,22 +1,25 @@
-name: "Pull Request Comment"
-description: "A GitHub Action that comment on Pull Request with file path or message"
+name: "Pull Request Comment From File"
+description: "A GitHub Action that comment on Pull Request with file path"
 author: "Hirofumi Suzuki"
 inputs:
   owner:
-    description: "A owner name of repository on pull request"
+    description: "The owner name of repository on PR"
     required: true
   repo:
-    description: "A repo name on pull request"
+    description: "The repo name on PR"
     required: true
   pr_number:
-    description: "A pull request number"
+    description: "The PR number"
     required: true
   filepath:
-    description: "A file path with contents"
+    description: "The file path with contents"
     required: true
+  template:
+    description: "The template of comment"
+    required: false
 outputs:
   url:
-    description: "A pull request comment url"
+    description: "The comment url on PR"
 runs:
   using: "docker"
   image: "Dockerfile"

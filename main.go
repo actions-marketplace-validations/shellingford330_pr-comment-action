@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
+	"text/template"
 
 	"github.com/google/go-github/v45/github"
 	"golang.org/x/oauth2"
@@ -18,24 +20,30 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	app := newApp(
-		newGitHubClient(ctx, token),
-		&pullRequest{
-			owner:  os.Getenv("INPUT_OWNER"),
-			repo:   os.Getenv("INPUT_REPO"),
-			number: prNum,
-		},
-	)
-	err = app.run(ctx)
+	pr := &pullRequest{
+		owner:  os.Getenv("INPUT_OWNER"),
+		repo:   os.Getenv("INPUT_REPO"),
+		number: prNum,
+	}
+	comment, err := CostructComment(os.Getenv("INPUT_TEMPLATE"), os.Getenv("INPUT_FILEPATH"))
 	if err != nil {
 		log.Fatal(err)
 	}
+	gitHub := newGitHub(
+		newGitHubClient(ctx, token),
+	)
+	url, err := gitHub.CreateComment(ctx, pr, comment)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("::set-output name=url::%s\n", url)
 	os.Exit(0)
 }
 
-type app struct {
-	githubClient *github.Client
-	pr           *pullRequest
+type GitHub struct {
+	client  *github.Client
+	pr      *pullRequest
+	comment string
 }
 
 type pullRequest struct {
@@ -44,10 +52,9 @@ type pullRequest struct {
 	number int
 }
 
-func newApp(githubClient *github.Client, pr *pullRequest) *app {
-	return &app{
-		githubClient: githubClient,
-		pr:           pr,
+func newGitHub(client *github.Client) *GitHub {
+	return &GitHub{
+		client: client,
 	}
 }
 
@@ -60,11 +67,38 @@ func newGitHubClient(ctx context.Context, token string) *github.Client {
 	return github.NewClient(tc)
 }
 
-func (a *app) run(ctx context.Context) error {
-	ic, _, err := a.githubClient.Issues.CreateComment(ctx, a.pr.owner, a.pr.repo, a.pr.number, &github.IssueComment{Body: github.String("Deployed")})
+func (a *GitHub) CreateComment(ctx context.Context, pr *pullRequest, comment string) (string, error) {
+	ic, _, err := a.client.Issues.CreateComment(
+		ctx,
+		a.pr.owner,
+		a.pr.repo,
+		a.pr.number,
+		&github.IssueComment{Body: github.String(a.comment)},
+	)
 	if err != nil {
-		return err
+		return "", err
 	}
-	fmt.Printf("::set-output name=url::%s\n", *ic.URL)
-	return nil
+	return *ic.URL, nil
+}
+
+func CostructComment(tmpl, filepath string) (string, error) {
+	data, err := os.ReadFile(filepath)
+	if err != nil {
+		return "", err
+	}
+	content := string(data)
+
+	if tmpl == "" {
+		tmpl = "{{.}}"
+	}
+	t, err := template.New("Comment template").Parse(tmpl)
+	if err != nil {
+		return "", err
+	}
+	var buf bytes.Buffer
+	err = t.Execute(&buf, content)
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }
