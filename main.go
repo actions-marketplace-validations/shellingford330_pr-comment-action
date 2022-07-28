@@ -41,9 +41,7 @@ func main() {
 }
 
 type GitHub struct {
-	client  *github.Client
-	pr      *pullRequest
-	comment string
+	client *github.Client
 }
 
 type pullRequest struct {
@@ -70,10 +68,10 @@ func newGitHubClient(ctx context.Context, token string) *github.Client {
 func (a *GitHub) CreateComment(ctx context.Context, pr *pullRequest, comment string) (string, error) {
 	ic, _, err := a.client.Issues.CreateComment(
 		ctx,
-		a.pr.owner,
-		a.pr.repo,
-		a.pr.number,
-		&github.IssueComment{Body: github.String(a.comment)},
+		pr.owner,
+		pr.repo,
+		pr.number,
+		&github.IssueComment{Body: github.String(comment)},
 	)
 	if err != nil {
 		return "", err
