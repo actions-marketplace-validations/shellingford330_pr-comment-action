@@ -79,6 +79,37 @@ jobs:
           repo: ${{ github.event.repository.name }}
           pr_number: ${{ github.event.issue.number }}
           filepath: output.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+````
+
+
+### Advanced usage
+
+
+The file content can be embedded using template.
+
+````yaml
+name: PR Comment
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  create:
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create output file
+        run: echo "Create PR comment successfully!" > output.txt
+      - name: Comment PR
+        uses: shellingford330/pr-comment-action@v0.0.5
+        with:
+          owner: ${{ github.event.repository.owner.login }}
+          repo: ${{ github.event.repository.name }}
+          pr_number: ${{ github.event.issue.number }}
+          filepath: output.txt
           template: |
             <details>
             <summary>Show Output</summary>
