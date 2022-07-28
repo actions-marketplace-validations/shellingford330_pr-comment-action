@@ -73,7 +73,7 @@ jobs:
       - name: Create output file
         run: echo "Create PR comment successfully!" > output.txt
       - name: Comment PR
-        uses: shellingford330/pr-comment-action@v0.0.5
+        uses: shellingford330/pr-comment-action@v0.0.6
         with:
           owner: ${{ github.event.repository.owner.login }}
           repo: ${{ github.event.repository.name }}
@@ -104,7 +104,7 @@ jobs:
       - name: Create output file
         run: echo "Create PR comment successfully!" > output.txt
       - name: Comment PR
-        uses: shellingford330/pr-comment-action@v0.0.5
+        uses: shellingford330/pr-comment-action@v0.0.6
         with:
           owner: ${{ github.event.repository.owner.login }}
           repo: ${{ github.event.repository.name }}
