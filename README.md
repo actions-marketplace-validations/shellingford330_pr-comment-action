@@ -1,6 +1,10 @@
 # pr-comment-action
 
-A GitHub Action which can create a comment with given owner, repo, pr_number and filepath.
+A GitHub Action which can create a comment on pull request with given owner, repo, pr_number and filepath.
+
+
+https://user-images.githubusercontent.com/41990509/181576222-cd81b5eb-3466-4791-8fd8-2b89af78fa4c.mp4
+
 
 ## Input
 
@@ -69,7 +73,7 @@ jobs:
       - name: Create output file
         run: echo "Create PR comment successfully!" > output.txt
       - name: Comment PR
-        uses: shellingford330/pr-comment-action@v0.0.3
+        uses: shellingford330/pr-comment-action@v0.0.5
         with:
           owner: ${{ github.event.repository.owner.login }}
           repo: ${{ github.event.repository.name }}
